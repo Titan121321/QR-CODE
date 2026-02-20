@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Terminal | Dark Mode</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #3b82f6;        /* Bright blue */
+            --primary-hover: #60a5fa;
+            --pending: #fbbf24;        /* Amber */
+            --success: #10b981;        /* Emerald */
+            --bg-dark: #0f172a;        /* Navy Background */
+            --card-bg: #1e293b;        /* Lighter Navy for cards */
+            --text-main: #f8fafc;      /* White-ish text */
+            --text-muted: #94a3b8;     /* Grayish text */
+            --border: #334155;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            width: 100%;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            color: var(--text-main);
+            letter-spacing: -0.025em;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-top: 8px;
+        }
+
+        /* CENTRALIZED CONTAINER */
+        .container {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 30px;
+            width: 95%;
+            max-width: 1100px;
+            margin-bottom: 50px;
+        }
+
+        /* SECTION CARDS */
+        section {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        section:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            color: var(--text-main);
+        }
+
+        /* TABLE STYLES */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            padding: 12px;
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        td {
+            padding: 20px 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+
+        /* UI ELEMENTS */
+        .badge {
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .badge-pending { 
+            background: rgba(251, 191, 36, 0.15); 
+            color: var(--pending); 
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .badge-success { 
+            background: rgba(16, 185, 129, 0.15); 
+            color: var(--success); 
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-confirm {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-confirm:hover {
+            background: var(--primary-hover);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .amount {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #ffffff; /* Explicitly white for visibility */
+        }
+
+        /* RESPONSIVE STACKING */
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+                max-width: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Payment Terminal</h1>
+        <p>Centralized monitoring for ESP32 QR transactions</p>
+    </div>
+
+    
+
+    <div class="container">
+        <section id="pending-block">
+            <h2>Pending <span id="p-count" class="badge badge-pending">0</span></h2>
+            <table id="pendingTable">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </section>
+
+        <section id="history-block">
+            <h2>History</h2>
+            <table id="historyTable">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script>
+        async function refreshDashboard() {
+            try {
+                const response = await fetch('/api/transactions');
+                const data = await response.json();
+                
+                const pTable = document.querySelector('#pendingTable tbody');
+                const hTable = document.querySelector('#historyTable tbody');
+                let count = 0;
+
+                pTable.innerHTML = '';
+                hTable.innerHTML = '';
+
+                data.slice().reverse().forEach(tx => {
+                    const rowHTML = `
+                        <tr>
+                            <td>${tx.timestamp.split(',')[1]}</td>
+                            <td class="amount">₹${tx.amount}</td>
+                            <td>
+                                ${tx.status === 'Pending' 
+                                    ? `<button class="btn-confirm" onclick="markPaid(${tx.id})">Confirm Paid</button>`
+                                    : `<span class="badge badge-success">Completed</span>`
+                                }
+                            </td>
+                        </tr>
+                    `;
+
+                    if (tx.status === 'Pending') {
+                        pTable.innerHTML += rowHTML;
+                        count++;
+                    } else {
+                        hTable.innerHTML += rowHTML;
+                    }
+                });
+
+                document.getElementById('p-count').innerText = count;
+
+            } catch (err) {
+                console.error("Dashboard Sync Error:", err);
+            }
+        }
+
+        async function markPaid(id) {
+            const response = await fetch('/api/update-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, status: 'Completed' })
+            });
+
+            if (response.ok) {
+                refreshDashboard();
+            }
+        }
+
+        setInterval(refreshDashboard, 3000);
+        refreshDashboard();
+    </script>
+</body>
+</html>
