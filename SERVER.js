@@ -1,12 +1,28 @@
-// 1. Navigation Logic
+// 1. Google Sheets Setup
+const SHEET_ID = '1UU1YLd30lGK8eNcixb7NVtQzxz2oi0l-0w_hx9mLll0'; 
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+const EDIT_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
+
+// 2. Navigation Logic
 function openView(viewId) {
-    // Remove 'active' class from all views to hide them
+    // Attach the correct link to the Edit button
+    const editBtn = document.getElementById('btn-edit-db');
+    if (editBtn) {
+        editBtn.href = EDIT_URL;
+    }
+
+    // Hide all views safely
     document.querySelectorAll('.view').forEach(view => {
         view.classList.remove('active');
+        view.classList.add('hidden');
     });
     
-    // Add 'active' class to the requested view to show it
-    document.getElementById(viewId).classList.add('active');
+    // Show the targeted view
+    const targetView = document.getElementById(viewId);
+    if (targetView) {
+        targetView.classList.remove('hidden');
+        targetView.classList.add('active');
+    }
 
     // Fetch data if opening the menu
     if(viewId === 'menu-view') {
@@ -14,19 +30,18 @@ function openView(viewId) {
     }
 }
 
-// 2. Google Sheets Logic
-// Your exact Sheet ID
-const SHEET_ID = '1UU1YLd30lGK8eNcixb7NVtQzxz2oi0l-0w_hx9mLll0'; 
-
-// THE FIX: This special URL formats the sheet as readable data instead of a webpage
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
-
+// 3. Database Fetch Logic
 async function fetchMenuFromGoogleSheets() {
-    const menuContainer = document.getElementById('menu-container');
+    // FIXED: Changed 'menu-container' to 'menu-list' to match your HTML
+    const menuContainer = document.getElementById('menu-list');
+    const loader = document.getElementById('menu-loading');
+
+    if (!menuContainer || !loader) return; // Safety check to prevent crashes
+
+    loader.style.display = 'block';
+    menuContainer.innerHTML = ''; // Clear old items
 
     try {
-        menuContainer.innerHTML = '<p class="system-msg">Fetching menu...</p>';
-        
         const response = await fetch(SHEET_URL);
         const text = await response.text();
         
@@ -35,7 +50,8 @@ async function fetchMenuFromGoogleSheets() {
         const data = JSON.parse(jsonText);
 
         const rows = data.table.rows;
-        menuContainer.innerHTML = ''; // Clear the loading text
+        
+        loader.style.display = 'none'; // Hide the loading text
 
         if (rows.length === 0) {
             menuContainer.innerHTML = '<p class="system-msg">No items found in the menu.</p>';
@@ -51,10 +67,10 @@ async function fetchMenuFromGoogleSheets() {
 
                 // Create the visual card for each menu item
                 const itemDiv = document.createElement('div');
-                itemDiv.className = 'menu-item';
+                itemDiv.className = 'menu-row'; // Updated to match your CSS styling
                 itemDiv.innerHTML = `
-                    <div class="item-name">${itemName}</div>
-                    <div class="item-price">₹${itemPrice}</div>
+                    <div class="menu-item-name">${itemName}</div>
+                    <div class="menu-item-price">₹${itemPrice}</div>
                 `;
                 menuContainer.appendChild(itemDiv);
             }
@@ -62,6 +78,6 @@ async function fetchMenuFromGoogleSheets() {
 
     } catch (error) {
         console.error('Error fetching data:', error);
-        menuContainer.innerHTML = '<p class="system-msg" style="color: red;">Error loading menu. Ensure your Google Sheet is set to "Anyone with the link can view".</p>';
+        loader.innerHTML = '<p class="system-msg" style="color: red;">Error loading menu. Ensure your Google Sheet is published.</p>';
     }
 }

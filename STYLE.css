@@ -124,3 +124,88 @@ header h1 {
 /* View Toggling */
 .view { display: none; }
 .view.active { display: block; }
+
+/* --- MENU VIEW STYLES --- */
+.view-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+    gap: 15px;
+}
+
+.icon-btn {
+    background: var(--bg-color);
+    border: 1px solid #e2e8f0;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-color);
+    transition: all 0.2s;
+}
+
+.icon-btn:hover { background: #e2e8f0; }
+
+.menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+/* Individual Menu Item Row */
+.menu-row {
+    background: var(--card-bg);
+    padding: 18px 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid var(--blue);
+    transition: transform 0.2s;
+}
+
+.menu-row:hover { transform: translateX(5px); }
+
+.menu-item-name {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.menu-item-price {
+    font-weight: 700;
+    color: var(--green);
+    font-size: 16px;
+    background: #d1fae5;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+/* Edit Button (Bottom Right matching sketch) */
+.edit-btn-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.btn-edit {
+    background-color: var(--text-color);
+    color: var(--card-bg);
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-edit:hover {
+    background-color: #334155;
+    transform: translateY(-2px);
+}
+
+.loading-state { text-align: center; padding: 40px; color: #64748b; }
