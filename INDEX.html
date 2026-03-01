@@ -4,7 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Vending Machine</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- CSS STYLES --- */
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f8fafc;
+            --text-color: #0f172a;
+            --card-bg: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        #app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        header { text-align: center; margin-bottom: 40px; margin-top: 20px; }
+        header h1 { font-size: 28px; color: var(--primary-color); }
+        #subtitle { color: #64748b; margin-top: 5px; }
+
+        /* View Toggling - This is what hides/shows the pages */
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.3s; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Button Grid */
+        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        .nav-btn {
+            background-color: var(--card-bg);
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 30px 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-color);
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn:hover { border-color: var(--primary-color); }
+        .nav-btn .icon { font-size: 32px; }
+
+        /* Menu View Styles */
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+            padding: 5px 0;
+        }
+
+        .menu-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+
+        .menu-item {
+            background-color: var(--card-bg);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .item-name { font-weight: bold; font-size: 18px; }
+        .item-price { font-weight: bold; color: var(--primary-color); font-size: 18px; }
+        .system-msg { text-align: center; color: #64748b; padding: 20px; }
+    </style>
 </head>
 <body>
     <div id="app-container">
@@ -30,33 +117,103 @@
             </div>
         </main>
 
-        <main id="menu-view" class="view hidden">
+        <main id="menu-view" class="view">
             <button class="back-btn" onclick="openView('home-view')">← Back to Home</button>
             <h2>Our Menu</h2>
             <div id="menu-container" class="menu-grid">
-                <p class="loading-text">Fetching menu from database...</p>
+                <p class="system-msg">Fetching menu from database...</p>
             </div>
         </main>
 
-        <main id="combos-view" class="view hidden">
+        <main id="combos-view" class="view">
             <button class="back-btn" onclick="openView('home-view')">← Back</button>
             <h2>Best Combos</h2>
-            <p>Combo data will go here.</p>
+            <p class="system-msg">Combo data will go here.</p>
         </main>
 
-        <main id="transactions-view" class="view hidden">
+        <main id="transactions-view" class="view">
             <button class="back-btn" onclick="openView('home-view')">← Back</button>
             <h2>Transactions</h2>
-            <p>Transaction history will go here.</p>
+            <p class="system-msg">Transaction history will go here.</p>
         </main>
 
-        <main id="cuisine-view" class="view hidden">
+        <main id="cuisine-view" class="view">
             <button class="back-btn" onclick="openView('home-view')">← Back</button>
             <h2>Cuisine Types</h2>
-            <p>Cuisine categories will go here.</p>
+            <p class="system-msg">Cuisine categories will go here.</p>
         </main>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // --- JAVASCRIPT LOGIC ---
+
+        // 1. Navigation Logic
+        function openView(viewId) {
+            // Remove 'active' class from all views to hide them
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            // Add 'active' class to the requested view to show it
+            document.getElementById(viewId).classList.add('active');
+
+            // Fetch data if opening the menu
+            if(viewId === 'menu-view') {
+                fetchMenuFromGoogleSheets();
+            }
+        }
+
+        // 2. Google Sheets Logic
+        // REPLACE THIS WITH YOUR ACTUAL SHEET ID
+        const SHEET_ID = '1UU1YLd30lGK8eNcixb7NVtQzxz2oi0l-0w_hx9mLll0'; 
+        const SHEET_URL = `https://docs.google.com/spreadsheets/d/1UU1YLd30lGK8eNcixb7NVtQzxz2oi0l-0w_hx9mLll0/edit?usp=sharing`;
+
+        async function fetchMenuFromGoogleSheets() {
+            const menuContainer = document.getElementById('menu-container');
+            
+            // If you haven't put your ID in yet, stop here so it doesn't break
+            if (SHEET_ID === '1UU1YLd30lGK8eNcixb7NVtQzxz2oi0l-0w_hx9mLll0') {
+                menuContainer.innerHTML = 'https://docs.google.com/spreadsheets/d/1UU1YLd30lGK8eNcixb7NVtQzxz2oi0l-0w_hx9mLll0/edit?usp=sharing';
+                return;
+            }
+
+            try {
+                menuContainer.innerHTML = '<p class="system-msg">Fetching menu...</p>';
+                
+                const response = await fetch(SHEET_URL);
+                const text = await response.text();
+                const jsonText = text.substring(47).slice(0, -2);
+                const data = JSON.parse(jsonText);
+
+                const rows = data.table.rows;
+                menuContainer.innerHTML = ''; 
+
+                if (rows.length === 0) {
+                    menuContainer.innerHTML = '<p class="system-msg">No items found in the menu.</p>';
+                    return;
+                }
+
+                rows.forEach(row => {
+                    // Make sure the row actually has data in columns A and B
+                    if (row.c && row.c[0] && row.c[1]) {
+                        const itemName = row.c[0].v;
+                        const itemPrice = row.c[1].v;
+
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'menu-item';
+                        itemDiv.innerHTML = `
+                            <div class="item-name">${itemName}</div>
+                            <div class="item-price">₹${itemPrice}</div>
+                        `;
+                        menuContainer.appendChild(itemDiv);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                menuContainer.innerHTML = '<p class="system-msg" style="color: red;">Error loading menu. Check if your Google Sheet is set to "Anyone with the link can view".</p>';
+            }
+        }
+    </script>
 </body>
 </html>
