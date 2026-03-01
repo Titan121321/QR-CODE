@@ -59,20 +59,27 @@ async function fetchMenuFromGoogleSheets() {
         }
 
         // Loop through each row in the sheet
+       // Loop through each row in the sheet
         rows.forEach(row => {
-            // Check if Column A (Name) and Column B (Price) exist and have data
-            if (row.c && row.c[0] && row.c[1]) {
-                const itemName = row.c[0].v;
-                const itemPrice = row.c[1].v;
+            // Make sure the row has data
+            if (row.c) {
+                // Safely grab Column A (No), Column B (Name), and Column C (Price)
+                // If a cell is blank, it defaults to empty text so it doesn't crash
+                const itemNo = row.c[0] && row.c[0].v !== null ? row.c[0].v : '';
+                const itemName = row.c[1] && row.c[1].v !== null ? row.c[1].v : '';
+                const itemPrice = row.c[2] && row.c[2].v !== null ? row.c[2].v : '';
 
-                // Create the visual card for each menu item
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'menu-row'; // Updated to match your CSS styling
-                itemDiv.innerHTML = `
-                    <div class="menu-item-name">${itemName}</div>
-                    <div class="menu-item-price">₹${itemPrice}</div>
-                `;
-                menuContainer.appendChild(itemDiv);
+                // Only create the item if there is actually a name
+                if (itemName) {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'menu-item';
+                    itemDiv.innerHTML = `
+                        <div class="item-no">${itemNo}</div>
+                        <div class="item-name">${itemName}</div>
+                        <div class="item-price">₹${itemPrice}</div>
+                    `;
+                    menuContainer.appendChild(itemDiv);
+                }
             }
         });
 
