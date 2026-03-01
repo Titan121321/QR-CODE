@@ -10,19 +10,11 @@ function openView(viewId) {
     document.getElementById(viewId).classList.remove('hidden');
     document.getElementById(viewId).classList.add('active');
 
-   function openView(viewId) {
-    // ... (code that hides other screens and shows the menu screen) ...
-
-    // THIS is the part that loads the sheet data immediately when the menu opens:
+    // If opening the menu, fetch the data
     if(viewId === 'menu-view') {
-        fetchMenuFromGoogleSheets(); 
+        fetchMenuFromGoogleSheets();
     }
 }
-}
-
-// Google Sheets Fetch Logic
-// YOU MUST PUT YOUR SHEET ID HERE:
-const SHEET_ID = '1UU1YLd30lGK8eNcixb7NVtQzxz2oi0l-0w_hx9mLll0'; 
 
 // This special URL formats the Google Sheet as a JSON object
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/1UU1YLd30lGK8eNcixb7NVtQzxz2oi0l-0w_hx9mLll0/edit?usp=sharing`;

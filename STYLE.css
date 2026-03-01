@@ -3,6 +3,12 @@
     --bg-color: #f8fafc;
     --text-color: #0f172a;
     --card-bg: #ffffff;
+    
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --green: #10b981;
+    --orange: #f59e0b;
+    --rose: #f43f5e;
 }
 
 * {
@@ -12,18 +18,19 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
 }
 
 #app-container {
-    max-width: 500px; /* Keeps it mobile-sized on desktop */
+    max-width: 650px; 
     margin: 0 auto;
     padding: 20px;
     min-height: 100vh;
 }
 
+/* Header Styles */
 header {
     text-align: center;
     margin-bottom: 40px;
@@ -31,25 +38,21 @@ header {
 }
 
 header h1 {
-    font-size: 28px;
-    color: var(--primary-color);
+    font-size: 32px;
+    color: var(--text-color);
+    margin-bottom: 15px;
 }
 
-#subtitle {
-    color: #64748b;
-    margin-top: 5px;
+.highlight { color: var(--primary-color); }
+
+.gradient-line {
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #f43f5e);
+    border-radius: 4px;
+    width: 100%;
 }
 
-/* View Toggling */
-.view { display: none; }
-.view.active { display: block; animation: fadeIn 0.3s; }
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Home Button Grid */
+/* Button Grid */
 .button-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -58,70 +61,66 @@ header h1 {
 
 .nav-btn {
     background-color: var(--card-bg);
-    border: 2px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 30px 10px;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-color);
+    border: 1px solid #e2e8f0;
+    border-radius: 16px; /* Slightly rounder corners */
+    padding: 30px 25px; /* Increased this to make the box much bigger */
     cursor: pointer;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     display: flex;
-    flex-direction: column;
+    flex-direction: row; 
     align-items: center;
-    gap: 10px;
+    gap: 20px; /* More space between icon and text */
+    text-align: left;
+    position: relative;
+    overflow: hidden;
     transition: all 0.2s ease;
 }
 
-.nav-btn:active {
-    transform: scale(0.95);
-    border-color: var(--primary-color);
+.nav-btn::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 8px; /* Made the colored line thicker */
 }
 
-.nav-btn .icon { font-size: 32px; }
+.card-blue::before { background-color: var(--blue); }
+.card-orange::before { background-color: var(--orange); }
+.card-purple::before { background-color: var(--purple); }
+.card-green::before { background-color: var(--green); }
 
-/* Menu View Styles */
-.back-btn {
-    background: none;
-    border: none;
-    color: var(--primary-color);
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-bottom: 20px;
-    padding: 5px 0;
+/* Icon & Text Formatting */
+.icon-wrapper {
+    background-color: #f8fafc;
+    padding: 16px; /* Bigger grey box behind the icon */
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.menu-grid {
+.icon { 
+    font-size: 32px; /* Bigger emoji */
+}
+
+.card-text {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-top: 20px;
+    gap: 6px;
 }
 
-.menu-item {
-    background-color: var(--card-bg);
-    padding: 16px;
-    border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-left: 4px solid var(--primary-color);
+.btn-title {
+    font-weight: 700;
+    font-size: 18px; /* Bigger title */
+    color: var(--text-color);
 }
 
-.item-name {
-    font-weight: bold;
-    font-size: 18px;
-}
-
-.item-price {
-    font-weight: bold;
-    color: var(--primary-color);
-    font-size: 18px;
-}
-
-.loading-text {
-    text-align: center;
+.btn-subtitle {
+    font-weight: 400;
+    font-size: 14px; /* Bigger subtitle */
     color: #64748b;
 }
+/* View Toggling */
+.view { display: none; }
+.view.active { display: block; }
