@@ -138,7 +138,9 @@ header h1 {
     padding: 8px 18px;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    margin-top: 5px !important;
+    margin-left: 10px !important;
+    gap: 10px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     transition: all 0.2s ease;
 }
@@ -148,7 +150,6 @@ header h1 {
     border-color: #2563eb;
     background: #eff6ff;
 }
-
 /* --- MENU VIEW STYLES --- */
 .view-header h2 {
     flex: 1;
@@ -185,6 +186,14 @@ header h1 {
     align-items: center;
 }
 
+.menu-grid { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 12px; 
+    
+    /* Increase this number to push the list further down */
+    margin-top: 40px !important; 
+}
 /* Add this new style for the item number */
 .item-no {
     font-weight: bold;
@@ -229,6 +238,11 @@ header h1 {
     transform: translateY(-2px);
 }
 /* This targets the headings on your pages and pulls them up by 10px */
+.view h2 {
+    margin-top: 5px !important;     /* Reduces space above the heading */
+    margin-bottom: 10px !important; /* Reduces the invisible space below the heading */
+    line-height: 1 !important;      /* Stops the text itself from taking up extra vertical room */
+}
 
 
 .loading-state { text-align: center; padding: 40px; color: #64748b; }
