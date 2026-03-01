@@ -66,6 +66,20 @@
                 <a href="#" id="btn-edit-db" target="_blank" class="btn-edit">✎ Click to edit</a>
             </div>
         </main>
+        <main id="cuisine-view" class="view">
+            <button class="back-btn" onclick="openView('home-view')">← Back to Home</button>
+            <h2>Cuisine Types</h2>
+            
+            <div class="category-buttons">
+                <button class="cat-btn veg-btn" onclick="loadCuisine('Veg')">🟢 Veg</button>
+                <button class="cat-btn non-veg-btn" onclick="loadCuisine('Non-Veg')">🔴 Non-Veg</button>
+                <button class="cat-btn drinks-btn" onclick="loadCuisine('Drinks')">🥤 Drinks</button>
+            </div>
+
+            <div id="cuisine-container" class="menu-grid">
+                <p class="system-msg">Select a category above to view items.</p>
+            </div>
+        </main>
     </div>
     <script src="SERVER.js"></script>
 </body>

@@ -82,9 +82,123 @@ async function fetchMenuFromGoogleSheets() {
                 }
             }
         });
+        // 3. Cuisine Filter Logic (Veg / Non-Veg)
+async function loadCuisine(type) {
+    const cuisineContainer = document.getElementById('cuisine-container');
+    cuisineContainer.innerHTML = `<p class="system-msg">Loading ${type} items...</p>`;
+
+    try {
+        const response = await fetch(SHEET_URL);
+        const text = await response.text();
+        const jsonText = text.substring(47).slice(0, -2);
+        const data = JSON.parse(jsonText);
+
+        const rows = data.table.rows;
+        cuisineContainer.innerHTML = ''; // Clear loading text
+
+        let itemsFound = false;
+
+        rows.forEach(row => {
+            // Check if No, Name, Price, AND Category (Column D) exist
+            if (row.c && row.c[0] && row.c[1] && row.c[2] && row.c[3]) {
+                
+                // Grab the category from Column D
+                const itemCategory = row.c[3].v ? row.c[3].v.toString().trim() : '';
+                
+                // If the category in the sheet matches the button clicked (Veg or Non-Veg)
+                if (itemCategory.toLowerCase() === type.toLowerCase()) {
+                    itemsFound = true;
+                    
+                    const itemNo = row.c[0].v !== null ? row.c[0].v : '';
+                    const itemName = row.c[1].v !== null ? row.c[1].v : '';
+                    const itemPrice = row.c[2].v !== null ? row.c[2].v : '';
+
+                    // Create the item card (reusing the exact same styling as the menu page)
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'menu-item';
+                    itemDiv.innerHTML = `
+                        <div class="item-no">${itemNo}</div>
+                        <div class="item-name">${itemName}</div>
+                        <div class="item-price">₹${itemPrice}</div>
+                    `;
+                    cuisineContainer.appendChild(itemDiv);
+                }
+            }
+        });
+
+        // If no items matched the filter
+        if (!itemsFound) {
+            cuisineContainer.innerHTML = `<p class="system-msg">No ${type} items found. Make sure you added "${type}" to Column D in your Google Sheet.</p>`;
+        }
+
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        cuisineContainer.innerHTML = '<p class="system-msg" style="color: red;">Error loading data.</p>';
+    }
+}
 
     } catch (error) {
         console.error('Error fetching data:', error);
         loader.innerHTML = '<p class="system-msg" style="color: red;">Error loading menu. Ensure your Google Sheet is published.</p>';
+    }
+}
+// --- CUISINE FILTER LOGIC ---
+async function loadCuisine(type) {
+    const cuisineContainer = document.getElementById('cuisine-container');
+    
+    // Show a loading message so the user knows it's working
+    cuisineContainer.innerHTML = `<p class="system-msg">Loading ${type} items...</p>`;
+
+    try {
+        const response = await fetch(SHEET_URL);
+        const text = await response.text();
+        
+        // Clean the Google Sheets JSON response
+        const jsonText = text.substring(47).slice(0, -2);
+        const data = JSON.parse(jsonText);
+        const rows = data.table.rows;
+        
+        cuisineContainer.innerHTML = ''; // Clear the loading message
+
+        let itemsFound = false;
+
+        // Loop through all rows in the sheet
+        rows.forEach(row => {
+            // Check if Column A (No), Column B (Name), Column C (Price), AND Column D (Category) exist
+            if (row.c && row.c[0] && row.c[1] && row.c[2] && row.c[3]) {
+                
+                // Get the category from Column D (index 3)
+                const itemCategory = row.c[3].v ? row.c[3].v.toString().trim().toLowerCase() : '';
+                const targetType = type.toLowerCase();
+                
+                // If the category in the sheet matches the button you clicked
+                if (itemCategory === targetType) {
+                    itemsFound = true;
+                    
+                    const itemNo = row.c[0].v !== null ? row.c[0].v : '';
+                    const itemName = row.c[1].v !== null ? row.c[1].v : '';
+                    const itemPrice = row.c[2].v !== null ? row.c[2].v : '';
+
+                    // Create the menu item card (reusing the same CSS from the main menu)
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'menu-item';
+                    itemDiv.innerHTML = `
+                        <div class="item-no">${itemNo}</div>
+                        <div class="item-name">${itemName}</div>
+                        <div class="item-price">₹${itemPrice}</div>
+                    `;
+                    cuisineContainer.appendChild(itemDiv);
+                }
+            }
+        });
+
+        // If no items match the category
+        if (!itemsFound) {
+            cuisineContainer.innerHTML = `<p class="system-msg">No ${type} items found. Please make sure you added "${type}" in Column D of your Google Sheet.</p>`;
+        }
+
+    } catch (error) {
+        console.error('Error fetching cuisine data:', error);
+        cuisineContainer.innerHTML = '<p class="system-msg" style="color: red;">Error loading items. Check your internet connection.</p>';
     }
 }

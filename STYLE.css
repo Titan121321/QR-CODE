@@ -243,6 +243,53 @@ header h1 {
     margin-bottom: 10px !important; /* Reduces the invisible space below the heading */
     line-height: 1 !important;      /* Stops the text itself from taking up extra vertical room */
 }
+/* --- CUISINE PAGE STYLES --- */
+.category-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    margin-top: 10px;
+}
+
+.cat-btn {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+.cat-btn:active {
+    transform: scale(0.95);
+}
+
+/* Green styling for Veg */
+.veg-btn {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 2px solid #22c55e;
+}
+
+/* Red styling for Non-Veg */
+.non-veg-btn {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 2px solid #ef4444;
+}
+/* Grey styling for Drinks to match the Veg/Non-Veg style */
+.drinks-btn {
+    background-color: #f3f4f6; /* Light grey background */
+    color: #374151;            /* Dark grey text */
+    border: 2px solid #6b7280; /* Solid grey border */
+}
 
 
 .loading-state { text-align: center; padding: 40px; color: #64748b; }
+/* This targets ONLY the heading on the Cuisine page to push it down */
+#cuisine-view h2 {
+    margin-top: 25px !important; 
+}
