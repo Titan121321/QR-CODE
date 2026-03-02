@@ -149,17 +149,32 @@ async function fetchCombosFromGoogleSheets() {
 
         rows.forEach(row => {
             if (row.c) {
+                // Read Columns A, B, C, and D
                 const name = row.c[0] ? row.c[0].v : '';
                 const desc = row.c[1] ? row.c[1].v : ''; 
                 const price = row.c[2] ? row.c[2].v : '';
+                const imgUrl = row.c[3] ? row.c[3].v : ''; // Column D for the image link
 
                 if (name) {
                     const cardDiv = document.createElement('div');
                     cardDiv.className = 'combo-card';
+                    
+                    // If an image URL exists, apply it with a dark overlay
+                    if (imgUrl) {
+                        cardDiv.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.8)), url('${imgUrl}')`;
+                        cardDiv.style.borderLeft = 'none'; 
+                    } else {
+                        cardDiv.style.borderLeft = '8px solid var(--orange)'; // Default look if no image
+                    }
+
+                    // Turn text white if there is an image
+                    const titleColor = imgUrl ? 'color: #ffffff;' : '';
+                    const descColor = imgUrl ? 'color: #cbd5e1;' : '';
+
                     cardDiv.innerHTML = `
                         <div class="combo-info">
-                            <div class="combo-title">${name}</div>
-                            <div class="combo-desc">${desc}</div>
+                            <div class="combo-title" style="${titleColor}">${name}</div>
+                            <div class="combo-desc" style="${descColor}">${desc}</div>
                         </div>
                         <div class="combo-pricing">
                             <span class="new-price">₹${price}</span>

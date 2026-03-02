@@ -305,15 +305,14 @@ header h1 {
     border: 2px solid #e2e8f0;
     border-radius: 20px;
     padding: 25px; 
-    min-height: 180px; /* <--- This is the magic command. Increase this number (e.g., 200px, 250px) to make the box even taller! */
+    min-height: 180px; /* <--- Makes the box tall enough to see the picture */
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
     display: flex;
     justify-content: space-between; 
-    align-items: flex-end; /* <--- Pushes text to the bottom so your image shows clearly at the top */
+    align-items: flex-end; /* <--- Pushes text down so it doesn't block the center of the image */
     transition: transform 0.2s, box-shadow 0.2s;
-    border-left: 8px solid var(--orange);
-
-    /* I added these 3 lines so when you add your background images, they automatically fit perfectly without stretching */
+    
+    /* ADD THESE 3 LINES FOR THE BACKGROUND IMAGES: */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
