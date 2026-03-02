@@ -66,6 +66,30 @@
                 <a href="#" id="btn-edit-db" target="_blank" class="btn-edit">✎ Click to edit</a>
             </div>
         </main>
+        <main id="combos-view" class="view hidden">
+            <div class="view-header">
+                <button class="icon-btn" onclick="openView('home-view')">← Back</button>
+                <h2>🔥 Best Combos</h2>
+            </div>
+            
+            <div id="combos-loading" class="loading-state">
+                <p>Fetching today's deals from database...</p>
+            </div>
+            
+            <div class="combos-grid" id="combos-list"></div>
+
+            <div class="bestsellers-section">
+                <button class="btn-bestsellers" onclick="toggleBestsellers()">🏆 Show Top 5 Bestsellers Today</button>
+                
+                <div id="bestsellers-list" class="hidden">
+                    <div class="bestseller-item"><span class="bestseller-rank">#1</span> <span>Chicken Biryani + Mint Lime</span></div>
+                    <div class="bestseller-item"><span class="bestseller-rank">#2</span> <span>2 Samosa + Tea</span></div>
+                    <div class="bestseller-item"><span class="bestseller-rank">#3</span> <span>Masala Dosa</span></div>
+                    <div class="bestseller-item"><span class="bestseller-rank">#4</span> <span>Veg Puff + Coffee</span></div>
+                    <div class="bestseller-item"><span class="bestseller-rank">#5</span> <span>Cold Coffee</span></div>
+                </div>
+            </div>
+        </main>
         <main id="cuisine-view" class="view">
             <button class="back-btn" onclick="openView('home-view')">← Back to Home</button>
             <h2>Cuisine Types</h2>
