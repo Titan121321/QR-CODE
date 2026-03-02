@@ -90,7 +90,32 @@
                 </div>
             </div>
         </main>
-        <main id="cuisine-view" class="view">
+
+        <main id="transactions-view" class="view hidden">
+            <div class="view-header">
+                <h2>💳 Live Transactions</h2>
+            </div>
+            <button class="back-btn" onclick="openView('home-view')">← Back to Home</button>
+
+            <div id="transactions-loading" class="loading-state">
+                <p>Loading live transactions...</p>
+            </div>
+            
+            <div class="transactions-list" id="transactions-list">
+                </div>
+
+            <div class="bottom-actions">
+                <a href="https://docs.google.com/spreadsheets/d/1UU1YLd30lGK8eNcixb7NVtQzxz2oi0l-0w_hx9mLll0/edit?gid=530703711#gid=530703711" id="btn-view-sheet" target="_blank" class="fancy-btn blue-gradient">
+                    📊 View Database
+                </a>
+                
+                <button onclick="endDay()" id="btn-end-day" class="fancy-btn red-gradient">
+                    🛑 End Day
+                </button>
+            </div>
+        </main>
+
+        <main id="cuisine-view" class="view hidden">
             <button class="back-btn" onclick="openView('home-view')">← Back to Home</button>
             <h2>Cuisine Types</h2>
             
