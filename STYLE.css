@@ -304,13 +304,19 @@ header h1 {
     background: linear-gradient(135deg, #ffffff, #f8fafc);
     border: 2px solid #e2e8f0;
     border-radius: 20px;
-    padding: 25px;
+    padding: 25px; 
+    min-height: 180px; /* <--- This is the magic command. Increase this number (e.g., 200px, 250px) to make the box even taller! */
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
     display: flex;
     justify-content: space-between; 
-    align-items: center;
+    align-items: flex-end; /* <--- Pushes text to the bottom so your image shows clearly at the top */
     transition: transform 0.2s, box-shadow 0.2s;
     border-left: 8px solid var(--orange);
+
+    /* I added these 3 lines so when you add your background images, they automatically fit perfectly without stretching */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .combo-card:hover {
