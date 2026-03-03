@@ -29,7 +29,6 @@
             overflow: hidden;
         }
 
-        /* The jagged receipt edge effect */
         .receipt-container::after {
             content: "";
             position: absolute;
@@ -41,9 +40,34 @@
             background-image: radial-gradient(circle at 10px 0, transparent 10px, white 11px);
         }
 
-        .header { text-align: center; margin-bottom: 25px; }
+        .header { text-align: center; margin-bottom: 20px; }
         .header h1 { margin: 0; color: #2563eb; font-size: 28px; }
         .header p { margin: 5px 0 0 0; color: #64748b; font-size: 14px; }
+
+        /* --- NEW TOKEN BOX STYLES --- */
+        .token-container {
+            text-align: center;
+            background: #eff6ff;
+            border: 2px dashed #3b82f6;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 0 0 20px 0;
+        }
+        .token-label {
+            font-size: 12px;
+            color: #3b82f6;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .token-number {
+            font-size: 42px;
+            font-weight: 900;
+            color: #1d4ed8;
+            margin-top: 5px;
+            line-height: 1;
+        }
+        /* ---------------------------- */
         
         .divider {
             border-top: 2px dashed #e2e8f0;
@@ -84,23 +108,22 @@
             font-size: 13px;
         }
 
-        /* --- UPDATED BUTTON STYLES --- */
+        /* Fixed Centered Button from last step */
         .btn-download {
-            display: block;
-            width: fit-content;       /* Button only as wide as its text */
-            margin: 25px auto 0 auto; /* Centers the block horizontally */
+            display: block; 
+            width: 80%; 
             background: #2563eb;
             color: white;
             text-align: center;
-            padding: 12px 25px;       /* Better padding for a centered button */
+            padding: 15px;
             border-radius: 12px;
             text-decoration: none;
             font-weight: bold;
+            margin: 25px auto 0; 
             transition: background 0.2s;
         }
         .btn-download:hover { background: #1d4ed8; }
 
-        /* Hide elements dynamically */
         #receipt-card { display: none; }
         #loading-state { text-align: center; color: #64748b; font-size: 16px; padding: 40px 0; }
     </style>
@@ -117,6 +140,11 @@
             <p>Official Digital Receipt</p>
         </div>
 
+        <div class="token-container">
+            <div class="token-label">Token Number</div>
+            <div class="token-number" id="r-token">--</div>
+        </div>
+
         <div class="row">
             <span class="label">Order Number:</span>
             <span class="value" id="r-order">#--</span>
@@ -130,7 +158,7 @@
 
         <div class="items-box">
             <div class="label" style="margin-bottom: 8px;">Items Purchased:</div>
-            <div id="r-info" style="text-align: left; font-size: 16px; font-weight: 700; color: #0f172a;">--</div>
+            <div class="value" id="r-info" style="text-align: left; font-size: 16px;">--</div>
         </div>
 
         <div class="divider"></div>
@@ -179,13 +207,17 @@
                         const info = row.c[2] ? row.c[2].v : '';
                         const amount = row.c[3] ? row.c[3].v : '';
 
+                        // --- THE TOKEN MAGIC ---
+                        // 'i' is the row's position in the array. Since the array starts at 0, we add 1!
+                        const tokenNumber = i + 1; 
+
                         let formattedTime = rawTime;
                         if (rawTime && rawTime.toString().startsWith('Date(')) {
                             const match = rawTime.match(/Date\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)/);
                             if (match) {
                                 const year = match[1];
                                 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                                const month = monthNames[parseInt(match[2])];
+                                const month = monthNames[parseInt(match[2])]; 
                                 const day = match[3];
                                 let hours = parseInt(match[4]);
                                 const minutes = match[5].padStart(2, '0');
@@ -198,6 +230,8 @@
                             }
                         }
 
+                        // Inject it into the HTML
+                        document.getElementById('r-token').innerText = tokenNumber; // Inject Token Number
                         document.getElementById('r-order').innerText = '#' + targetOrderNo;
                         document.getElementById('r-time').innerText = formattedTime;
                         document.getElementById('r-info').innerText = info;
@@ -222,4 +256,4 @@
         fetchDigitalReceipt();
     </script>
 </body>
-</html> 
+</html>
