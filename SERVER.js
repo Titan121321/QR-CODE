@@ -253,29 +253,3 @@ async function fetchTransactionsFromGoogleSheets() {
     }
 }
 
-// 8. End Day Logic (Writing to Sheet)
-async function endDay() {
-    const btn = document.getElementById('btn-end-day');
-    
-    if (APPS_SCRIPT_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
-        alert("Wait! You need to create a Google Apps Script and paste the URL into your SERVER.js code before this button can write to the database.");
-        return;
-    }
-
-    if (!confirm("Are you sure you want to end the day? This will add a divider to the sheet.")) return;
-
-    const originalText = btn.innerHTML;
-    btn.innerHTML = "Processing...";
-    btn.disabled = true;
-
-    try {
-        await fetch(APPS_SCRIPT_URL + "?action=endDay", { method: 'GET', mode: 'no-cors' });
-        alert("Day ended successfully! Check your database.");
-        fetchTransactionsFromGoogleSheets(); 
-    } catch (error) {
-        alert("Command sent! Check Google Sheets.");
-    }
-
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-}
