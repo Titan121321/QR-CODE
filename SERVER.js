@@ -221,13 +221,36 @@ async function fetchTransactionsFromGoogleSheets() {
         if (rows.length === 0) return txContainer.innerHTML = '<p class="system-msg" style="text-align:center;">No transactions yet.</p>';
 
         // Reverse so the newest transactions are at the top
+        // Reverse so the newest transactions are at the top
         [...rows].reverse().forEach(row => {
             if (row.c) {
-                const time = row.c[0] ? row.c[0].v : '';
+                // --- START OF NEW DATE FIXER LOGIC ---
+                const rawTime = row.c[0] ? row.c[0].v : '';
+                let time = rawTime;
+                
+                if (rawTime && rawTime.toString().startsWith('Date(')) {
+                    const match = rawTime.match(/Date\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)/);
+                    if (match) {
+                        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                        const month = monthNames[parseInt(match[2])];
+                        const day = match[3];
+                        let hours = parseInt(match[4]);
+                        const minutes = match[5].padStart(2, '0');
+                        const ampm = hours >= 12 ? 'PM' : 'AM';
+                        hours = hours % 12;
+                        hours = hours ? hours : 12; 
+                        
+                        // We use a <br> to put the date on top and time on bottom neatly
+                        time = `${month} ${day}<br>${hours}:${minutes} ${ampm}`;
+                    }
+                }
+                // --- END OF NEW DATE FIXER LOGIC ---
+
                 const orderNo = row.c[1] ? row.c[1].v : '';
                 const orderInfo = row.c[2] ? row.c[2].v : '';
                 const amount = row.c[3] ? row.c[3].v : '';
-
+                
+                // ... the rest of your if (time || orderInfo) logic stays the same ...
                 if (time || orderInfo) {
                     const txDiv = document.createElement('div');
                     
