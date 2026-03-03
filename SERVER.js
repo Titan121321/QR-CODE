@@ -23,7 +23,7 @@ function openView(viewId) {
         targetView.classList.remove('hidden');
         targetView.classList.add('active');
     }
-
+    document.body.setAttribute('data-view', viewId);
     // Trigger the correct fetch when opening a screen
     if (viewId === 'menu-view') fetchMenuFromGoogleSheets();
     if (viewId === 'combos-view') fetchCombosFromGoogleSheets();
