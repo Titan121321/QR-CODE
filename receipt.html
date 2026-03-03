@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CanteenPay - Digital Receipt</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .receipt-container {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* The jagged receipt edge effect */
+        .receipt-container::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background-size: 20px 20px;
+            background-image: radial-gradient(circle at 10px 0, transparent 10px, white 11px);
+        }
+
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { margin: 0; color: #2563eb; font-size: 28px; }
+        .header p { margin: 5px 0 0 0; color: #64748b; font-size: 14px; }
+        
+        .divider {
+            border-top: 2px dashed #e2e8f0;
+            margin: 20px 0;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .label { color: #64748b; font-weight: 500; }
+        .value { font-weight: 700; color: #0f172a; text-align: right; }
+        
+        .items-box {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .total-label { font-size: 20px; font-weight: 800; }
+        .total-amount { font-size: 28px; font-weight: 900; color: #10b981; }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        /* --- UPDATED BUTTON STYLES --- */
+        .btn-download {
+            display: block;
+            width: fit-content;       /* Button only as wide as its text */
+            margin: 25px auto 0 auto; /* Centers the block horizontally */
+            background: #2563eb;
+            color: white;
+            text-align: center;
+            padding: 12px 25px;       /* Better padding for a centered button */
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-download:hover { background: #1d4ed8; }
+
+        /* Hide elements dynamically */
+        #receipt-card { display: none; }
+        #loading-state { text-align: center; color: #64748b; font-size: 16px; padding: 40px 0; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-state">
+        <h2 id="status-msg">Fetching your receipt... ⏳</h2>
+    </div>
+
+    <div id="receipt-card" class="receipt-container">
+        <div class="header">
+            <h1>CanteenPay</h1>
+            <p>Official Digital Receipt</p>
+        </div>
+
+        <div class="row">
+            <span class="label">Order Number:</span>
+            <span class="value" id="r-order">#--</span>
+        </div>
+        <div class="row">
+            <span class="label">Date & Time:</span>
+            <span class="value" id="r-time">--</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="items-box">
+            <div class="label" style="margin-bottom: 8px;">Items Purchased:</div>
+            <div id="r-info" style="text-align: left; font-size: 16px; font-weight: 700; color: #0f172a;">--</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="total-row">
+            <span class="total-label">Total Paid:</span>
+            <span class="total-amount" id="r-amount">₹0</span>
+        </div>
+
+        <a href="#" class="btn-download" onclick="window.print()">📥 Save / Print PDF</a>
+
+        <div class="footer">
+            <p>Thank you for your purchase!</p>
+            <p>Powered by CanteenPay System</p>
+        </div>
+    </div>
+
+    <script>
+        const SHEET_ID = '1fAIJlQZZk6Hcy06Hz1ojnACh565ppD3l9wwoQRW16KU'; 
+        const TRANSACTIONS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=TRANSACTIONS_DB`;
+
+        async function fetchDigitalReceipt() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetOrderNo = urlParams.get('order');
+
+            if (!targetOrderNo) {
+                document.getElementById('status-msg').innerHTML = "Invalid QR Code.<br><br>No order number found.";
+                return;
+            }
+
+            try {
+                const response = await fetch(TRANSACTIONS_URL);
+                const text = await response.text();
+                const data = JSON.parse(text.substring(47).slice(0, -2));
+                const rows = data.table.rows;
+                
+                let orderFound = false;
+
+                for (let i = rows.length - 1; i >= 0; i--) {
+                    const row = rows[i];
+                    
+                    if (row.c && row.c[1] && row.c[1].v.toString() === targetOrderNo.toString()) {
+                        orderFound = true;
+                        
+                        const rawTime = row.c[0] ? row.c[0].v : '';
+                        const info = row.c[2] ? row.c[2].v : '';
+                        const amount = row.c[3] ? row.c[3].v : '';
+
+                        let formattedTime = rawTime;
+                        if (rawTime && rawTime.toString().startsWith('Date(')) {
+                            const match = rawTime.match(/Date\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)/);
+                            if (match) {
+                                const year = match[1];
+                                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                                const month = monthNames[parseInt(match[2])];
+                                const day = match[3];
+                                let hours = parseInt(match[4]);
+                                const minutes = match[5].padStart(2, '0');
+                                
+                                const ampm = hours >= 12 ? 'PM' : 'AM';
+                                hours = hours % 12;
+                                hours = hours ? hours : 12; 
+                                
+                                formattedTime = `${month} ${day}, ${year} at ${hours}:${minutes} ${ampm}`;
+                            }
+                        }
+
+                        document.getElementById('r-order').innerText = '#' + targetOrderNo;
+                        document.getElementById('r-time').innerText = formattedTime;
+                        document.getElementById('r-info').innerText = info;
+                        document.getElementById('r-amount').innerText = '₹' + amount;
+
+                        document.getElementById('loading-state').style.display = 'none';
+                        document.getElementById('receipt-card').style.display = 'block';
+                        break;
+                    }
+                }
+
+                if (!orderFound) {
+                    document.getElementById('status-msg').innerHTML = `Order #${targetOrderNo} not found in database.`;
+                }
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('status-msg').innerHTML = "Network error. Could not load receipt.";
+            }
+        }
+
+        fetchDigitalReceipt();
+    </script>
+</body>
+</html>
