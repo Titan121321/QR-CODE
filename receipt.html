@@ -44,7 +44,7 @@
         .header h1 { margin: 0; color: #2563eb; font-size: 28px; }
         .header p { margin: 5px 0 0 0; color: #64748b; font-size: 14px; }
 
-        /* --- NEW TOKEN BOX STYLES --- */
+        /* --- TOKEN BOX STYLES --- */
         .token-container {
             text-align: center;
             background: #eff6ff;
@@ -108,7 +108,6 @@
             font-size: 13px;
         }
 
-        /* Fixed Centered Button from last step */
         .btn-download {
             display: block; 
             width: 80%; 
@@ -131,7 +130,7 @@
 <body>
 
     <div id="loading-state">
-        <h2 id="status-msg">Fetching your receipt... ⏳</h2>
+        <h2 id="status-msg">Generating your receipt... ⏳</h2>
     </div>
 
     <div id="receipt-card" class="receipt-container">
@@ -177,83 +176,45 @@
     </div>
 
     <script>
-        const SHEET_ID = '1fAIJlQZZk6Hcy06Hz1ojnACh565ppD3l9wwoQRW16KU'; 
-        const TRANSACTIONS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=TRANSACTIONS_DB`;
-
-        async function fetchDigitalReceipt() {
+        function loadDigitalReceipt() {
+            // Grab the data passed from the ESP32 via the URL
             const urlParams = new URLSearchParams(window.location.search);
             const targetOrderNo = urlParams.get('order');
+            const amount = urlParams.get('amt');
+            let items = urlParams.get('items');
 
-            if (!targetOrderNo) {
-                document.getElementById('status-msg').innerHTML = "Invalid QR Code.<br><br>No order number found.";
+            // If the URL is missing data, show an error
+            if (!targetOrderNo || !amount || !items) {
+                document.getElementById('status-msg').innerHTML = "Invalid QR Code.<br><br>No order details found.";
                 return;
             }
 
-            try {
-                const response = await fetch(TRANSACTIONS_URL);
-                const text = await response.text();
-                const data = JSON.parse(text.substring(47).slice(0, -2));
-                const rows = data.table.rows;
-                
-                let orderFound = false;
+            // --- THE TOKEN MAGIC ---
+            // Take the last 3 digits of the timestamp-based Order ID to use as a token number
+            const tokenNumber = targetOrderNo.slice(-3);
 
-                for (let i = rows.length - 1; i >= 0; i--) {
-                    const row = rows[i];
-                    
-                    if (row.c && row.c[1] && row.c[1].v.toString() === targetOrderNo.toString()) {
-                        orderFound = true;
-                        
-                        const rawTime = row.c[0] ? row.c[0].v : '';
-                        const info = row.c[2] ? row.c[2].v : '';
-                        const amount = row.c[3] ? row.c[3].v : '';
+            // Clean up the items text (replace underscores with spaces, plus signs with line breaks)
+            const formattedItems = items.replace(/_/g, " ").replace(/\+/g, "<br>");
 
-                        // --- THE TOKEN MAGIC ---
-                        // 'i' is the row's position in the array. Since the array starts at 0, we add 1!
-                        const tokenNumber = i + 1; 
+            // Format current date and time
+            const now = new Date();
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+            const formattedTime = now.toLocaleString('en-US', options);
 
-                        let formattedTime = rawTime;
-                        if (rawTime && rawTime.toString().startsWith('Date(')) {
-                            const match = rawTime.match(/Date\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)/);
-                            if (match) {
-                                const year = match[1];
-                                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                                const month = monthNames[parseInt(match[2])]; 
-                                const day = match[3];
-                                let hours = parseInt(match[4]);
-                                const minutes = match[5].padStart(2, '0');
-                                
-                                const ampm = hours >= 12 ? 'PM' : 'AM';
-                                hours = hours % 12;
-                                hours = hours ? hours : 12; 
-                                
-                                formattedTime = `${month} ${day}, ${year} at ${hours}:${minutes} ${ampm}`;
-                            }
-                        }
+            // Inject it into the HTML
+            document.getElementById('r-token').innerText = tokenNumber; 
+            document.getElementById('r-order').innerText = '#' + targetOrderNo;
+            document.getElementById('r-time').innerText = formattedTime;
+            document.getElementById('r-info').innerHTML = formattedItems;
+            document.getElementById('r-amount').innerText = '₹' + amount;
 
-                        // Inject it into the HTML
-                        document.getElementById('r-token').innerText = tokenNumber; // Inject Token Number
-                        document.getElementById('r-order').innerText = '#' + targetOrderNo;
-                        document.getElementById('r-time').innerText = formattedTime;
-                        document.getElementById('r-info').innerText = info;
-                        document.getElementById('r-amount').innerText = '₹' + amount;
-
-                        document.getElementById('loading-state').style.display = 'none';
-                        document.getElementById('receipt-card').style.display = 'block';
-                        break;
-                    }
-                }
-
-                if (!orderFound) {
-                    document.getElementById('status-msg').innerHTML = `Order #${targetOrderNo} not found in database.`;
-                }
-
-            } catch (error) {
-                console.error(error);
-                document.getElementById('status-msg').innerHTML = "Network error. Could not load receipt.";
-            }
+            // Hide the loading screen and show the beautiful receipt
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('receipt-card').style.display = 'block';
         }
 
-        fetchDigitalReceipt();
+        // Run the function immediately when the page loads
+        loadDigitalReceipt();
     </script>
 </body>
 </html>
