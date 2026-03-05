@@ -27,6 +27,7 @@
             padding: 30px;
             position: relative;
             overflow: hidden;
+            display: none; /* Hidden until URL is parsed */
         }
 
         .receipt-container::after {
@@ -44,7 +45,6 @@
         .header h1 { margin: 0; color: #2563eb; font-size: 28px; }
         .header p { margin: 5px 0 0 0; color: #64748b; font-size: 14px; }
 
-        /* --- TOKEN BOX STYLES --- */
         .token-container {
             text-align: center;
             background: #eff6ff;
@@ -67,49 +67,21 @@
             margin-top: 5px;
             line-height: 1;
         }
-        /* ---------------------------- */
         
-        .divider {
-            border-top: 2px dashed #e2e8f0;
-            margin: 20px 0;
-        }
-
-        .row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 15px;
-        }
-
+        .divider { border-top: 2px dashed #e2e8f0; margin: 20px 0; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
         .label { color: #64748b; font-weight: 500; }
         .value { font-weight: 700; color: #0f172a; text-align: right; }
         
-        .items-box {
-            background: #f1f5f9;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-        }
-
+        .items-box { background: #f1f5f9; padding: 15px; border-radius: 10px; margin: 20px 0; }
+        .total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
         .total-label { font-size: 20px; font-weight: 800; }
         .total-amount { font-size: 28px; font-weight: 900; color: #10b981; }
 
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #94a3b8;
-            font-size: 13px;
-        }
+        .footer { text-align: center; margin-top: 30px; color: #94a3b8; font-size: 13px; }
 
         .btn-download {
-            display: block; 
+            display: inline-block; 
             width: 80%; 
             background: #2563eb;
             color: white;
@@ -123,7 +95,6 @@
         }
         .btn-download:hover { background: #1d4ed8; }
 
-        #receipt-card { display: none; }
         #loading-state { text-align: center; color: #64748b; font-size: 16px; padding: 40px 0; }
     </style>
 </head>
@@ -167,7 +138,9 @@
             <span class="total-amount" id="r-amount">₹0</span>
         </div>
 
-        <a href="#" class="btn-download" onclick="window.print()">📥 Save / Print PDF</a>
+        <div style="text-align: center;">
+            <a href="#" class="btn-download" onclick="window.print()">📥 Save / Print PDF</a>
+        </div>
 
         <div class="footer">
             <p>Thank you for your purchase!</p>
@@ -176,45 +149,41 @@
     </div>
 
     <script>
-        function loadDigitalReceipt() {
-            // Grab the data passed from the ESP32 via the URL
+        function generateInstantReceipt() {
+            // 1. Grab all the data directly from the URL link
             const urlParams = new URLSearchParams(window.location.search);
-            const targetOrderNo = urlParams.get('order');
-            const amount = urlParams.get('amt');
-            let items = urlParams.get('items');
-
-            // If the URL is missing data, show an error
-            if (!targetOrderNo || !amount || !items) {
-                document.getElementById('status-msg').innerHTML = "Invalid QR Code.<br><br>No order details found.";
+            const orderNo = urlParams.get('order');
+            
+            if (!orderNo) {
+                document.getElementById('status-msg').innerHTML = "Invalid QR Code.<br><br>No order data found.";
                 return;
             }
 
-            // --- THE TOKEN MAGIC ---
-            // Take the last 3 digits of the timestamp-based Order ID to use as a token number
-            const tokenNumber = targetOrderNo.slice(-3);
+            // 2. Parse the rest of the URL parameters
+            const token = urlParams.get('token') || '0';
+            let items = urlParams.get('items') || 'Unknown Items';
+            items = items.replace(/_/g, " "); // Convert LIME_JUICE_x3 back to LIME JUICE x3
+            const amount = urlParams.get('total') || '0';
 
-            // Clean up the items text (replace underscores with spaces, plus signs with line breaks)
-            const formattedItems = items.replace(/_/g, " ").replace(/\+/g, "<br>");
-
-            // Format current date and time
+            // 3. Generate the current time accurately on the customer's phone
             const now = new Date();
-            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
-            const formattedTime = now.toLocaleString('en-US', options);
+            const timeOptions = { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+            const formattedTime = now.toLocaleString('en-US', timeOptions);
 
-            // Inject it into the HTML
-            document.getElementById('r-token').innerText = tokenNumber; 
-            document.getElementById('r-order').innerText = '#' + targetOrderNo;
+            // 4. Inject the data straight into the HTML
+            document.getElementById('r-token').innerText = token;
+            document.getElementById('r-order').innerText = '#' + orderNo;
             document.getElementById('r-time').innerText = formattedTime;
-            document.getElementById('r-info').innerHTML = formattedItems;
+            document.getElementById('r-info').innerText = items;
             document.getElementById('r-amount').innerText = '₹' + amount;
 
-            // Hide the loading screen and show the beautiful receipt
+            // 5. Hide the loading screen and show the receipt
             document.getElementById('loading-state').style.display = 'none';
             document.getElementById('receipt-card').style.display = 'block';
         }
 
         // Run the function immediately when the page loads
-        loadDigitalReceipt();
+        generateInstantReceipt();
     </script>
 </body>
 </html>
